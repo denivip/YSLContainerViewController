@@ -11,6 +11,7 @@
 @protocol YSLContainerViewControllerDelegate <NSObject>
 
 - (void)containerViewItemIndex:(NSInteger)index currentController:(UIViewController *)controller;
+- (void)containerViewShouldHide;
 
 @end
 
@@ -29,7 +30,10 @@
 @property (nonatomic, strong) UIColor *menuIndicatorColor;
 
 - (id)initWithControllers:(NSArray *)controllers
+                   sizes:(NSArray *)sizes
              topBarHeight:(CGFloat)topBarHeight
      parentViewController:(UIViewController *)parentViewController;
+
+- (void)scrollMenuViewSelectedIndex:(NSInteger)index;
 
 @end

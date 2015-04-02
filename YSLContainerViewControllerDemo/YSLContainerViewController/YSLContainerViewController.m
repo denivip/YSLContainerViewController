@@ -14,6 +14,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
 @interface YSLContainerViewController () <UIScrollViewDelegate, YSLScrollMenuViewDelegate>
 
 @property (nonatomic, assign) CGFloat topBarHeight;
+@property (nonatomic, strong) NSArray *sizes;
 @property (nonatomic, assign) NSInteger currentIndex;
 @property (nonatomic, strong) YSLScrollMenuView *menuView;
 
@@ -22,8 +23,9 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
 @implementation YSLContainerViewController
 
 - (id)initWithControllers:(NSArray *)controllers
+                    sizes:(NSArray *)sizes
              topBarHeight:(CGFloat)topBarHeight
-     parentViewController:(UIViewController *)parentViewController
+     parentViewController:(UIViewController *)parentViewController;
 {
     self = [super init];
     if (self) {
@@ -35,7 +37,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
         _titles = [[NSMutableArray alloc] init];
         _childControllers = [[NSMutableArray alloc] init];
         _childControllers = [controllers mutableCopy];
-        
+        _sizes = sizes.copy;
         NSMutableArray *titles = [NSMutableArray array];
         for (UIViewController *vc in _childControllers) {
             [titles addObject:[vc valueForKey:@"title"]];
@@ -59,7 +61,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     // ContentScrollview setup
     _contentScrollView = [[UIScrollView alloc]init];
     _contentScrollView.frame = CGRectMake(0,_topBarHeight + kYSLScrollMenuViewHeight, self.view.frame.size.width, self.view.frame.size.height - (_topBarHeight + kYSLScrollMenuViewHeight));
-    _contentScrollView.backgroundColor = [UIColor clearColor];
+    _contentScrollView.backgroundColor = [UIColor colorWithWhite:1.f alpha:0.7f];
     _contentScrollView.pagingEnabled = YES;
     _contentScrollView.delegate = self;
     _contentScrollView.showsHorizontalScrollIndicator = NO;
@@ -88,6 +90,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     _menuView.itemIndicatorColor = self.menuIndicatorColor;
     _menuView.scrollView.scrollsToTop = NO;
     [_menuView setItemTitleArray:self.titles];
+    [_menuView setItemSizeArray:self.sizes];
     [self.view addSubview:_menuView];
     [_menuView setShadowView];
     
@@ -127,7 +130,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     
     [self setChildViewControllerWithCurrentIndex:index];
     
-    if (index == self.currentIndex) { return; }
+    if (index == self.currentIndex) { [self.delegate containerViewShouldHide]; return;}
     self.currentIndex = index;
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(containerViewItemIndex:currentController:)]) {
@@ -151,6 +154,10 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     nextItemOffsetX = (_menuView.scrollView.contentSize.width - _menuView.scrollView.frame.size.width) * targetIndex / (_menuView.itemViewArray.count - 1);
     currentItemOffsetX = (_menuView.scrollView.contentSize.width - _menuView.scrollView.frame.size.width) * self.currentIndex / (_menuView.itemViewArray.count - 1);
     
+    targetIndex = MAX(0, MIN(targetIndex, self.childControllers.count - 1));
+//    nextItemOffsetX = [self.sizes[targetIndex] CGPointValue].x;
+//    currentItemOffsetX = [self.sizes[self.currentIndex] CGPointValue].x;
+
     if (targetIndex >= 0 && targetIndex < self.childControllers.count) {
         // MenuView Move
         CGFloat indicatorUpdateRatio = ratio;
@@ -180,6 +187,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     
     if (currentIndex == self.currentIndex) { return; }
     self.currentIndex = currentIndex;
+    
     
     // item color
     [_menuView setItemTextColor:self.menuItemTitleColor

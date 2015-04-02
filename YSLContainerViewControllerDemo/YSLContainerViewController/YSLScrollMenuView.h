@@ -19,6 +19,7 @@
 @property (nonatomic, weak) id <YSLScrollMenuViewDelegate> delegate;
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) NSArray *itemTitleArray;
+@property (nonatomic, strong) NSArray *itemSizeArray;
 @property (nonatomic, strong) NSArray *itemViewArray;
 
 @property (nonatomic, strong) UIColor *viewbackgroudColor;

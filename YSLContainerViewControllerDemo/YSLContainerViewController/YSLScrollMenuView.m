@@ -8,9 +8,9 @@
 
 #import "YSLScrollMenuView.h"
 
-static const CGFloat kYSLScrollMenuViewWidth  = 90;
+static const CGFloat kYSLScrollMenuViewWidth  = 58;
 static const CGFloat kYSLScrollMenuViewMargin = 10;
-static const CGFloat kYSLIndicatorHeight = 3;
+static const CGFloat kYSLIndicatorHeight = 4;
 
 @interface YSLScrollMenuView ()
 
@@ -75,6 +75,13 @@ static const CGFloat kYSLIndicatorHeight = 3;
     _indicatorView.backgroundColor = itemIndicatorColor;
 }
 
+- (void)setItemSizeArray:(NSArray *)itemSizeArray{
+    if (_itemSizeArray != itemSizeArray) {
+        _itemSizeArray = itemSizeArray;
+        [self layoutSubviews];
+    }
+}
+
 - (void)setItemTitleArray:(NSArray *)itemTitleArray
 {
     if (_itemTitleArray != itemTitleArray) {
@@ -83,7 +90,9 @@ static const CGFloat kYSLIndicatorHeight = 3;
         
         for (int i = 0; i < itemTitleArray.count; i++) {
             CGRect frame = CGRectMake(0, 0, kYSLScrollMenuViewWidth, CGRectGetHeight(self.frame));
+//            UIButton *itemView = [UIButton buttonWithType:UIButtonTypeCustom];
             UILabel *itemView = [[UILabel alloc] initWithFrame:frame];
+            [itemView setFrame:frame];
             [self.scrollView addSubview:itemView];
             itemView.tag = i;
             itemView.text = itemTitleArray[i];
@@ -102,7 +111,7 @@ static const CGFloat kYSLIndicatorHeight = 3;
         
         // indicator
         _indicatorView = [[UIView alloc]init];
-        _indicatorView.frame = CGRectMake(10, _scrollView.frame.size.height - kYSLIndicatorHeight, kYSLScrollMenuViewWidth, kYSLIndicatorHeight);
+        _indicatorView.frame = CGRectMake(10, _scrollView.frame.size.height - kYSLIndicatorHeight, 60, kYSLIndicatorHeight);
         _indicatorView.backgroundColor = self.itemIndicatorColor;
         [_scrollView addSubview:_indicatorView];
     }
@@ -113,16 +122,43 @@ static const CGFloat kYSLIndicatorHeight = 3;
 - (void)setIndicatorViewFrameWithRatio:(CGFloat)ratio isNextItem:(BOOL)isNextItem toIndex:(NSInteger)toIndex
 {
     CGFloat indicatorX = 0.0;
+    
+    if (ratio == 1) {
+        ;
+    }
+    CGPoint pointIndex = [self.itemSizeArray[toIndex] CGPointValue];
     if (isNextItem) {
-        indicatorX = ((kYSLScrollMenuViewMargin + kYSLScrollMenuViewWidth) * ratio ) + (toIndex * kYSLScrollMenuViewWidth) + ((toIndex + 1) * kYSLScrollMenuViewMargin);
+        CGFloat width = 0;
+        
+//        indicatorX = ((kYSLScrollMenuViewMargin + kYSLScrollMenuViewWidth) * ratio ) + (toIndex * kYSLScrollMenuViewWidth) + ((toIndex + 1) * kYSLScrollMenuViewMargin);
+        if(toIndex < self.itemSizeArray.count - 1){
+            CGPoint pointIndex1 = [self.itemSizeArray[toIndex + 1] CGPointValue];
+            width += pointIndex1.x - pointIndex.x;
+        }
+//        else{
+//            width =
+//        }
+        indicatorX = pointIndex.x +  width * ratio;
     } else {
-        indicatorX =  ((kYSLScrollMenuViewMargin + kYSLScrollMenuViewWidth) * (1 - ratio) ) + (toIndex * kYSLScrollMenuViewWidth) + ((toIndex + 1) * kYSLScrollMenuViewMargin);
+        CGFloat width = kYSLScrollMenuViewWidth;
+        if(toIndex < self.itemSizeArray.count - 1){
+            CGPoint pointIndex1 = [self.itemSizeArray[toIndex + 1] CGPointValue];
+            width = pointIndex1.x - pointIndex.x;
+        }
+        else{
+            
+        }
+        indicatorX = pointIndex.x + width * (1 -ratio );
+//        indicatorX =  ((kYSLScrollMenuViewMargin + kYSLScrollMenuViewWidth) * (1 - ratio) ) + (toIndex * kYSLScrollMenuViewWidth) + ((toIndex + 1) * kYSLScrollMenuViewMargin);
     }
     
-    if (indicatorX < kYSLScrollMenuViewMargin || indicatorX > self.scrollView.contentSize.width - (kYSLScrollMenuViewMargin + kYSLScrollMenuViewWidth)) {
+    if (indicatorX < 0 || indicatorX > self.scrollView.contentSize.width - 58) {
         return;
     }
+//    CGPoint point = [self.itemSizeArray[!isNextItem ? toIndex : (toIndex + 1)] CGPointValue];
+//    _indicatorView.frame = CGRectMake(point.x, _scrollView.frame.size.height - kYSLIndicatorHeight, point.y, kYSLIndicatorHeight);
     _indicatorView.frame = CGRectMake(indicatorX, _scrollView.frame.size.height - kYSLIndicatorHeight, kYSLScrollMenuViewWidth, kYSLIndicatorHeight);
+    NSLog(@"index = %lu, %f", toIndex, indicatorX);
     //  NSLog(@"retio : %f",_indicatorView.frame.origin.x);
 }
 
@@ -168,21 +204,21 @@ static const CGFloat kYSLIndicatorHeight = 3;
     
     CGFloat x = kYSLScrollMenuViewMargin;
     for (NSUInteger i = 0; i < self.itemViewArray.count; i++) {
-        CGFloat width = kYSLScrollMenuViewWidth;
         UIView *itemView = self.itemViewArray[i];
-        itemView.frame = CGRectMake(x, 0, width, self.scrollView.frame.size.height);
-        x += width + kYSLScrollMenuViewMargin;
+        CGPoint point = [self.itemSizeArray[i] CGPointValue];
+        itemView.frame = CGRectMake(point.x, 0, point.y, self.scrollView.frame.size.height);
+        x = point.x + point.y;
     }
     self.scrollView.contentSize = CGSizeMake(x, self.scrollView.frame.size.height);
     
     CGRect frame = self.scrollView.frame;
-    if (self.frame.size.width > x) {
-        frame.origin.x = (self.frame.size.width - x) / 2;
-        frame.size.width = x;
-    } else {
+//    if (self.frame.size.width > x) {
+//        frame.origin.x = (self.frame.size.width - x) / 2;
+//        frame.size.width = x;
+//    } else {
         frame.origin.x = 0;
         frame.size.width = self.frame.size.width;
-    }
+//    }
     self.scrollView.frame = frame;
 }
 
