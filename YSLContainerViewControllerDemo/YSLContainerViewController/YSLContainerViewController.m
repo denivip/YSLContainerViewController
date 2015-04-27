@@ -33,6 +33,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
         [parentViewController addChildViewController:self];
         [self didMoveToParentViewController:parentViewController];
         
+        _currentIndex = -1;
         _topBarHeight = topBarHeight;
         _titles = [[NSMutableArray alloc] init];
         _childControllers = [[NSMutableArray alloc] init];
@@ -132,6 +133,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     
     if (index == self.currentIndex) { [self.delegate containerViewShouldHide]; return;}
     self.currentIndex = index;
+    [self scrollViewDidScroll:_contentScrollView];
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(containerViewItemIndex:currentController:)]) {
         [self.delegate containerViewItemIndex:self.currentIndex currentController:_childControllers[self.currentIndex]];
@@ -151,29 +153,19 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     CGFloat nextItemOffsetX = 1.0f;
     CGFloat currentItemOffsetX = 1.0f;
     
-    nextItemOffsetX = (_menuView.scrollView.contentSize.width - _menuView.scrollView.frame.size.width) * targetIndex / (_menuView.itemViewArray.count - 1);
-    currentItemOffsetX = (_menuView.scrollView.contentSize.width - _menuView.scrollView.frame.size.width) * self.currentIndex / (_menuView.itemViewArray.count - 1);
     
     targetIndex = MAX(0, MIN(targetIndex, self.childControllers.count - 1));
-//    nextItemOffsetX = [self.sizes[targetIndex] CGPointValue].x;
-//    currentItemOffsetX = [self.sizes[self.currentIndex] CGPointValue].x;
+    nextItemOffsetX = [self.sizes[targetIndex] CGPointValue].x;
+    currentItemOffsetX = [self.sizes[self.currentIndex] CGPointValue].x;
 
     if (targetIndex >= 0 && targetIndex < self.childControllers.count) {
         // MenuView Move
         CGFloat indicatorUpdateRatio = ratio;
         if (isToNextItem) {
             
-            CGPoint offset = _menuView.scrollView.contentOffset;
-            offset.x = (nextItemOffsetX - currentItemOffsetX) * ratio + currentItemOffsetX;
-            [_menuView.scrollView setContentOffset:offset animated:NO];
-            
             indicatorUpdateRatio = indicatorUpdateRatio * 1;
             [_menuView setIndicatorViewFrameWithRatio:indicatorUpdateRatio isNextItem:isToNextItem toIndex:self.currentIndex];
         } else {
-            
-            CGPoint offset = _menuView.scrollView.contentOffset;
-            offset.x = currentItemOffsetX - (nextItemOffsetX - currentItemOffsetX) * ratio;
-            [_menuView.scrollView setContentOffset:offset animated:NO];
             
             indicatorUpdateRatio = indicatorUpdateRatio * -1;
             [_menuView setIndicatorViewFrameWithRatio:indicatorUpdateRatio isNextItem:isToNextItem toIndex:targetIndex];
