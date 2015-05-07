@@ -16,6 +16,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
 @property (nonatomic, assign) CGFloat topBarHeight;
 @property (nonatomic, strong) NSArray *sizes;
 @property (nonatomic, assign) NSInteger currentIndex;
+@property (nonatomic, assign) NSInteger initialIndex;
 @property (nonatomic, strong) YSLScrollMenuView *menuView;
 
 @end
@@ -23,6 +24,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
 @implementation YSLContainerViewController
 
 - (id)initWithControllers:(NSArray *)controllers
+             initialIndex:(int)index
                     sizes:(NSArray *)sizes
              topBarHeight:(CGFloat)topBarHeight
      parentViewController:(UIViewController *)parentViewController;
@@ -39,6 +41,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
         _childControllers = [[NSMutableArray alloc] init];
         _childControllers = [controllers mutableCopy];
         _sizes = sizes.copy;
+        _initialIndex = index;
         NSMutableArray *titles = [NSMutableArray array];
         for (UIViewController *vc in _childControllers) {
             [titles addObject:[vc valueForKey:@"title"]];
@@ -95,7 +98,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     [self.view addSubview:_menuView];
     [_menuView setShadowView];
     
-    [self scrollMenuViewSelectedIndex:0];
+    [self scrollMenuViewSelectedIndex:self.initialIndex];
 }
 
 #pragma mark -- private
@@ -144,6 +147,9 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+    if(self.currentIndex < 0){
+        return;
+    }
     CGFloat oldPointX = self.currentIndex * scrollView.frame.size.width;
     CGFloat ratio = (scrollView.contentOffset.x - oldPointX) / scrollView.frame.size.width;
     
@@ -156,7 +162,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     
     targetIndex = MAX(0, MIN(targetIndex, self.childControllers.count - 1));
     nextItemOffsetX = [self.sizes[targetIndex] CGPointValue].x;
-    currentItemOffsetX = [self.sizes[self.currentIndex] CGPointValue].x;
+    currentItemOffsetX = [self.sizes[self.currentIndex>=0?:targetIndex] CGPointValue].x;
 
     if (targetIndex >= 0 && targetIndex < self.childControllers.count) {
         // MenuView Move
