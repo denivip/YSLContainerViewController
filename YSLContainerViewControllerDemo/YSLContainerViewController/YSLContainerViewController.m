@@ -125,12 +125,15 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
 
 - (void)scrollMenuViewSelectedIndex:(NSInteger)index
 {
-    [_contentScrollView setContentOffset:CGPointMake(index * _contentScrollView.frame.size.width, 0.) animated:YES];
+    BOOL isAnimated = YES;
+    [_contentScrollView setContentOffset:CGPointMake(index * _contentScrollView.frame.size.width, 0.) animated:isAnimated];
     
-    // item color
-    [_menuView setItemTextColor:self.menuItemTitleColor
+    // item color will be set after scrolling
+    if(!isAnimated){
+        [_menuView setItemTextColor:self.menuItemTitleColor
            seletedItemTextColor:self.menuItemSelectedTitleColor
                    currentIndex:index];
+    }
     
     [self setChildViewControllerWithCurrentIndex:index];
     
@@ -153,12 +156,12 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     CGFloat oldPointX = self.currentIndex * scrollView.frame.size.width;
     CGFloat ratio = (scrollView.contentOffset.x - oldPointX) / scrollView.frame.size.width;
     
-    BOOL isToNextItem = (_contentScrollView.contentOffset.x > oldPointX);
-    NSInteger targetIndex = (isToNextItem) ? self.currentIndex + 1 : self.currentIndex - 1;
+    CGFloat curPointX = _contentScrollView.contentOffset.x;
+    BOOL isToNextItem = (curPointX > oldPointX);
+    NSInteger targetIndex = (isToNextItem) ? (self.currentIndex + 1) : (self.currentIndex - 1);
     
     CGFloat nextItemOffsetX = 1.0f;
     CGFloat currentItemOffsetX = 1.0f;
-    
     
     targetIndex = MAX(0, MIN(targetIndex, self.childControllers.count - 1));
     nextItemOffsetX = [self.sizes[targetIndex] CGPointValue].x;
