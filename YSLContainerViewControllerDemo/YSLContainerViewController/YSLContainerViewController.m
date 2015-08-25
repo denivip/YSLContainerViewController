@@ -14,7 +14,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
 @interface YSLContainerViewController () <UIScrollViewDelegate, YSLScrollMenuViewDelegate>
 
 @property (nonatomic, assign) CGFloat topBarHeight;
-@property (nonatomic, strong) NSArray *sizes;
+@property (nonatomic, strong) NSArray *itemSizes;
 @property (nonatomic, assign) NSInteger currentIndex;
 @property (nonatomic, assign) NSInteger initialIndex;
 @property (nonatomic, strong) YSLScrollMenuView *menuView;
@@ -25,7 +25,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
 
 - (id)initWithControllers:(NSArray *)controllers
              initialIndex:(int)index
-                    sizes:(NSArray *)sizes
+                positions:(NSArray *)sizes
              topBarHeight:(CGFloat)topBarHeight
      parentViewController:(UIViewController *)parentViewController;
 {
@@ -40,7 +40,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
         _titles = [[NSMutableArray alloc] init];
         _childControllers = [[NSMutableArray alloc] init];
         _childControllers = [controllers mutableCopy];
-        _sizes = sizes.copy;
+        _itemSizes = sizes.copy;
         _initialIndex = index;
         NSMutableArray *titles = [NSMutableArray array];
         for (UIViewController *vc in _childControllers) {
@@ -94,7 +94,7 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     _menuView.itemIndicatorColor = self.menuIndicatorColor;
     _menuView.scrollView.scrollsToTop = NO;
     [_menuView setItemTitleArray:self.titles];
-    [_menuView setItemSizeArray:self.sizes];
+    [_menuView setItemSizeArray:self.itemSizes];
     [self.view addSubview:_menuView];
     [_menuView setShadowView];
     
@@ -153,33 +153,34 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     if(self.currentIndex < 0){
         return;
     }
-    CGFloat oldPointX = self.currentIndex * scrollView.frame.size.width;
-    CGFloat ratio = (scrollView.contentOffset.x - oldPointX) / scrollView.frame.size.width;
-    
-    CGFloat curPointX = _contentScrollView.contentOffset.x;
-    BOOL isToNextItem = (curPointX > oldPointX);
-    NSInteger targetIndex = (isToNextItem) ? (self.currentIndex + 1) : (self.currentIndex - 1);
-    
-    CGFloat nextItemOffsetX = 1.0f;
-    CGFloat currentItemOffsetX = 1.0f;
-    
-    targetIndex = MAX(0, MIN(targetIndex, self.childControllers.count - 1));
-    nextItemOffsetX = [self.sizes[targetIndex] CGPointValue].x;
-    currentItemOffsetX = [self.sizes[self.currentIndex>=0?:targetIndex] CGPointValue].x;
-
-    if (targetIndex >= 0 && targetIndex < self.childControllers.count) {
-        // MenuView Move
-        CGFloat indicatorUpdateRatio = ratio;
-        if (isToNextItem) {
-            
-            indicatorUpdateRatio = indicatorUpdateRatio * 1;
-            [_menuView setIndicatorViewFrameWithRatio:indicatorUpdateRatio isNextItem:isToNextItem toIndex:self.currentIndex];
-        } else {
-            
-            indicatorUpdateRatio = indicatorUpdateRatio * -1;
-            [_menuView setIndicatorViewFrameWithRatio:indicatorUpdateRatio isNextItem:isToNextItem toIndex:targetIndex];
-        }
-    }
+    [_menuView setIndicatorViewFrameWithRatio:1.0 toIndex:self.currentIndex];
+//    CGFloat oldPointX = self.currentIndex * scrollView.frame.size.width;
+//    CGFloat ratio = (scrollView.contentOffset.x - oldPointX) / scrollView.frame.size.width;
+//    
+//    CGFloat curPointX = _contentScrollView.contentOffset.x;
+//    BOOL isToNextItem = (curPointX > oldPointX);
+//    NSInteger targetIndex = (isToNextItem) ? (self.currentIndex + 1) : (self.currentIndex - 1);
+//    
+//    CGFloat nextItemOffsetX = 1.0f;
+//    CGFloat currentItemOffsetX = 1.0f;
+//    
+//    targetIndex = MAX(0, MIN(targetIndex, self.childControllers.count - 1));
+//    nextItemOffsetX = [self.itemSizes[targetIndex] CGPointValue].x;??? objectAtIndex 0
+//    currentItemOffsetX = [self.itemSizes[self.currentIndex>=0?:targetIndex] CGPointValue].x;!!! objectAtIndex
+//
+//    if (targetIndex >= 0 && targetIndex < self.childControllers.count) {
+//        // MenuView Move
+//        CGFloat indicatorUpdateRatio = ratio;
+//        if (isToNextItem) {
+//            
+//            indicatorUpdateRatio = indicatorUpdateRatio * 1;
+//            [_menuView setIndicatorViewFrameWithRatio:indicatorUpdateRatio isNextItem:isToNextItem toIndex:self.currentIndex];
+//        } else {
+//            
+//            indicatorUpdateRatio = indicatorUpdateRatio * -1;
+//            [_menuView setIndicatorViewFrameWithRatio:indicatorUpdateRatio isNextItem:isToNextItem toIndex:targetIndex];
+//        }
+//    }
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView

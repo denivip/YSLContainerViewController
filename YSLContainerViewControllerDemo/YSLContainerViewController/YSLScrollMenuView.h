@@ -30,7 +30,7 @@
 
 - (void)setShadowView;
 
-- (void)setIndicatorViewFrameWithRatio:(CGFloat)ratio isNextItem:(BOOL)isNextItem toIndex:(NSInteger)toIndex;
+- (void)setIndicatorViewFrameWithRatio:(CGFloat)ratio toIndex:(NSInteger)toIndex;
 
 - (void)setItemTextColor:(UIColor *)itemTextColor
     seletedItemTextColor:(UIColor *)selectedItemTextColor

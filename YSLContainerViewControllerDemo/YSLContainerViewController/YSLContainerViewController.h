@@ -31,7 +31,7 @@
 
 - (id)initWithControllers:(NSArray *)controllers
              initialIndex:(int)index
-                   sizes:(NSArray *)sizes
+                positions:(NSArray *)sizes
              topBarHeight:(CGFloat)topBarHeight
      parentViewController:(UIViewController *)parentViewController;
 
