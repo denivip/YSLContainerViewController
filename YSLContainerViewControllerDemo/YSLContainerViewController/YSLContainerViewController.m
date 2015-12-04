@@ -62,30 +62,36 @@ static const CGFloat kYSLScrollMenuViewHeight = 40;
     UIView *viewCover = [[UIView alloc]init];
     [self.view addSubview:viewCover];
     
+    CGRect selfFrame = self.view.frame;
+    CGRect csvFrame = CGRectMake(0, _topBarHeight + kYSLScrollMenuViewHeight, selfFrame.size.width, selfFrame.size.height - (_topBarHeight + kYSLScrollMenuViewHeight));
+    //CGFloat screen_w = SCREEN_WIDTH;
+    
     // ContentScrollview setup
     _contentScrollView = [[UIScrollView alloc]init];
-    _contentScrollView.frame = CGRectMake(0,_topBarHeight + kYSLScrollMenuViewHeight, self.view.frame.size.width, self.view.frame.size.height - (_topBarHeight + kYSLScrollMenuViewHeight));
+    _contentScrollView.frame = csvFrame;
     _contentScrollView.backgroundColor = [UIColor colorWithWhite:1.f alpha:0.7f];
     _contentScrollView.pagingEnabled = YES;
     _contentScrollView.delegate = self;
     _contentScrollView.showsHorizontalScrollIndicator = NO;
     _contentScrollView.scrollsToTop = NO;
     [self.view addSubview:_contentScrollView];
-    _contentScrollView.contentSize = CGSizeMake(_contentScrollView.frame.size.width * self.childControllers.count, _contentScrollView.frame.size.height);
+    _contentScrollView.contentSize = CGSizeMake(csvFrame.size.width * self.childControllers.count, csvFrame.size.height);
     
     // ContentViewController setup
+    //NSArray* vv = @[ [UIColor redColor], [UIColor blueColor] ];
     for (int i = 0; i < self.childControllers.count; i++) {
         id obj = [self.childControllers objectAtIndex:i];
         if ([obj isKindOfClass:[UIViewController class]]) {
             UIViewController *controller = (UIViewController*)obj;
-            CGFloat scrollWidth = _contentScrollView.frame.size.width;
-            CGFloat scrollHeght = _contentScrollView.frame.size.height;
+            CGFloat scrollWidth = csvFrame.size.width;
+            CGFloat scrollHeght = csvFrame.size.height;
             controller.view.frame = CGRectMake(i * scrollWidth, 0, scrollWidth, scrollHeght);
             [_contentScrollView addSubview:controller.view];
+            //controller.view.backgroundColor = [vv objectAtIndex:i%2];
         }
     }
     // meunView
-    _menuView = [[YSLScrollMenuView alloc]initWithFrame:CGRectMake(0, _topBarHeight, self.view.frame.size.width, kYSLScrollMenuViewHeight)];
+    _menuView = [[YSLScrollMenuView alloc]initWithFrame:CGRectMake(0, _topBarHeight, selfFrame.size.width, kYSLScrollMenuViewHeight)];
     _menuView.backgroundColor = [UIColor clearColor];
     _menuView.delegate = self;
     _menuView.viewbackgroudColor = self.menuBackGroudColor;
